@@ -50,6 +50,9 @@ class Cell:
     def parse_platform_os(self, value):
         return value.split(',')[0].strip() if ',' in value else value
 
+    def __str__(self):
+        return f"{self.oem} | {self.model} | {self.launch_announced} | {self.launch_status} | {self.body_dimensions} | {self.body_weight} | {self.body_sim} | {self.display_type} | {self.display_size} | {self.display_resolution} | {self.features_sensors} | {self.platform_os}"
+
 def read_csv(file_path):
     cells = []
     with open(file_path, 'r') as file:
@@ -62,3 +65,4 @@ def read_csv(file_path):
 if __name__ == "__main__":
     file_path = "cells.csv"
     cells = read_csv(file_path)
+
