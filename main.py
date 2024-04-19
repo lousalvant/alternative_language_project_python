@@ -1,5 +1,6 @@
 import csv
 import re
+from collections import defaultdict
 
 class Cell:
     def __init__(self, oem, model, launch_announced, launch_status, body_dimensions, body_weight, body_sim,
@@ -62,7 +63,48 @@ def read_csv(file_path):
             cells.append(cell)
     return cells
 
+def calculate_highest_avg_body_weight(cells):
+    avg_weights = defaultdict(float)
+    counts = defaultdict(int)
+    for cell in cells:
+        weight = cell.body_weight
+        if weight is not None:
+            avg_weights[cell.oem] += weight
+            counts[cell.oem] += 1
+    highest_avg_oem = max(avg_weights, key=lambda x: avg_weights[x] / counts[x])
+    print("OEM with highest average body weight:", highest_avg_oem)
+
+def find_phones_announced_released_different_year(cells):
+    mismatched_announced_released = [(cell.oem, cell.model) for cell in cells if isinstance(cell.launch_announced, int) and isinstance(cell.launch_status, int) and cell.launch_announced != cell.launch_status]
+    if mismatched_announced_released:
+        print("Phones announced in one year and released in another:")
+        for oem, model in mismatched_announced_released:
+            print(f"OEM: {oem}, Model: {model}")
+    else:
+        print("No phones announced in one year and released in another.")
+
+def count_phones_with_single_sensor(cells):
+    count = sum(1 for cell in cells if cell.features_sensors and len(cell.features_sensors.split(',')) == 1)
+    print("Number of phones with only one feature sensor:", count)
+
+def find_year_with_most_launches(cells):
+    launch_years = [cell.launch_announced for cell in cells if isinstance(cell.launch_announced, int) and cell.launch_announced > 1999]
+    if launch_years:
+        most_common_year = max(set(launch_years), key=launch_years.count)
+        count_most_common_year = launch_years.count(most_common_year)
+        print("Year with the most phones launched (later than 1999):", most_common_year, "with", count_most_common_year, "phones.")
+    else:
+        print("No phones launched later than 1999.")
+
 if __name__ == "__main__":
     file_path = "cells.csv"
     cells = read_csv(file_path)
 
+    print("OEM            | Model               | Launch Announced | Launch Status   | Body Dimensions    | Body Weight | Body SIM      | Display Type       | Display Size | Display Resolution | Features Sensors   | Platform OS        ")
+    for cell in cells:
+        print(cell)
+
+    calculate_highest_avg_body_weight(cells)
+    find_phones_announced_released_different_year(cells)
+    count_phones_with_single_sensor(cells)
+    find_year_with_most_launches(cells)
